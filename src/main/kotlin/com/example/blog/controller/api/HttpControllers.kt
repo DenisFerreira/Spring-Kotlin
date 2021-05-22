@@ -36,7 +36,7 @@ class ArticleController(private val repository: ArticleRepository) {
     fun findOne(@PathVariable slug: String): Article {
         val article =
             repository.findBySlug(slug) ?: throw ResponseStatusException(NOT_FOUND, "This article does not exist")
-        article.add(linkTo(methodOn(ArticleController::class.java).findOne(slug)).withRel("All articles"))
+        article.add(linkTo(methodOn(ArticleController::class.java).findAll()).withRel("All articles"))
         article.author.let {
             it.add(linkTo(methodOn(UserController::class.java).findOne(it.login)).withSelfRel())
         }
