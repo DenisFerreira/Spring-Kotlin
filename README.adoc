@@ -987,6 +987,55 @@ class HtmlController(private val repository: ArticleRepository,
 
 Restart the web application, refresh `http://localhost:8080/`, you should see the banner on the blog homepage.
 
+== Documentation
+=== Overview
+Nowadays, front-end and back-end components often separate a web application. Usually, we expose APIs as a back-end component for the front-end component or third-party app integrations.
+
+In such a scenario, it is essential to have proper specifications for the back-end APIs. At the same time, the API documentation should be informative, readable, and easy to follow.
+
+Moreover, reference documentation should simultaneously describe every change in the API. Accomplishing this manually is a tedious exercise, so automation of the process was inevitable.
+
+If you are not familiar with Swagger, visit its web page to learn more before continuing with this tutorial.
+
+=== Spring Boot Dependency
+For the Spring Boot based projects, it's enough to add a single springfox-boot-starter dependency:
+----
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-boot-starter</artifactId>
+    <version>3.0.0</version>
+</dependency>
+----
+
+=== Integrating Swagger 2 Into the Project
+The configuration of Swagger mainly centers around the Docket bean:
+----
+@Configuration
+public class SpringFoxConfig {
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+          .select()
+          //.apis(RequestHandlerSelectors.any())
+          .apis(RequestHandlerSelectors.basePackage("com.example.blog.controller.api"))
+          .paths(PathSelectors.any())
+          .build();
+    }
+}
+----
+After defining the Docket bean, its select() method returns an instance of ApiSelectorBuilder, which provides a way to control the endpoints exposed by Swagger.
+We can configure predicates for selecting RequestHandlers with the help of RequestHandlerSelectors and PathSelectors. Using any() for both will make documentation for our entire API available through Swagger.
+For this project I will use the swagger documentation just for our api package
+
+=== Verification
+To verify that Springfox is working, we can visit this URL in our browser:
+
+http://localhost:8080/v2/api-docs
+
+The result is a JSON response with a large number of key-value pairs, which is not very human readable. Fortunately, Swagger provides Swagger UI for this purpose.
+
+http://localhost:8080/swagger-ui/
+
 == Conclusion
 
 We have now finished to build this sample Kotlin blog application. The source code https://github.com/spring-guides/tut-spring-boot-kotlin[is available on Github]. You can also have a look to https://docs.spring.io/spring/docs/current/spring-framework-reference/languages.html#kotlin[Spring Framework] and https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-kotlin.html[Spring Boot] reference documentation if you need more details on specific features.

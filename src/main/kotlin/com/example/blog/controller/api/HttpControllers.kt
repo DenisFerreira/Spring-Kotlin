@@ -4,6 +4,10 @@ import com.example.blog.domain.entity.Article
 import com.example.blog.domain.entity.User
 import com.example.blog.domain.repository.ArticleRepository
 import com.example.blog.domain.repository.UserRepository
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 import org.springframework.http.HttpStatus.NOT_FOUND
@@ -15,8 +19,16 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/article")
+@Api(value = "Articles", description = "Operations pertaining to articles")
 class ArticleController(private val repository: ArticleRepository) {
 
+    @ApiOperation(value = "View a list of available articles", response = Iterable::class)
+    @ApiResponses(value = [
+        ApiResponse(code = 200, message = "Successfully retrieved list"),
+        ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    ])
     @GetMapping("/")
     fun findAll(): Iterable<Article> {
         val list = repository.findAllByOrderByAddedAtDesc()
@@ -35,7 +47,8 @@ class ArticleController(private val repository: ArticleRepository) {
     @GetMapping("/{slug}")
     fun findOne(@PathVariable slug: String): Article {
         val article =
-            repository.findBySlug(slug) ?: throw ResponseStatusException(NOT_FOUND, "This article does not exist")
+                repository.findBySlug(slug)
+                        ?: throw ResponseStatusException(NOT_FOUND, "This article does not exist")
         article.add(linkTo(methodOn(ArticleController::class.java).findAll()).withRel("All articles"))
         article.author.let {
             it.add(linkTo(methodOn(UserController::class.java).findOne(it.login)).withSelfRel())
@@ -58,8 +71,8 @@ class UserController(private val repository: UserRepository) {
     @GetMapping("/{login}")
     fun findOne(@PathVariable login: String): User {
         val user = repository.findByLogin(login)
-            ?.add(linkTo(methodOn(UserController::class.java).findAll()).withRel("All users"))
-            ?: throw ResponseStatusException(NOT_FOUND, "This user does not exist")
+                ?.add(linkTo(methodOn(UserController::class.java).findAll()).withRel("All users"))
+                ?: throw ResponseStatusException(NOT_FOUND, "This user does not exist")
         return user.add(linkTo(methodOn(UserController::class.java).findOne(login)).withSelfRel())
     }
 }
