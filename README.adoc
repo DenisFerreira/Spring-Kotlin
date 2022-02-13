@@ -1009,6 +1009,7 @@ For the Spring Boot based projects, it's enough to add a single springfox-boot-s
 
 === Integrating Swagger 2 Into the Project
 The configuration of Swagger mainly centers around the Docket bean:
+[source,kotlin]
 ----
 @Configuration
 public class SpringFoxConfig {
@@ -1036,6 +1037,45 @@ The result is a JSON response with a large number of key-value pairs, which is n
 
 http://localhost:8080/swagger-ui/
 
+== Scheduling Tasks
+[source,xml]
+----
+<dependency>
+  <groupId>org.awaitility</groupId>
+  <artifactId>awaitility</artifactId>
+  <version>3.1.2</version>
+  <scope>test</scope>
+</dependency>
+----
+The Scheduled annotation defines when a particular method runs.
+[source,kotlin]
+----
+@Component
+public class ScheduledTasks {
+
+	private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
+
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+	@Scheduled(fixedRate = 5000)
+	public void reportCurrentTime() {
+		log.info("The time is now {}", dateFormat.format(new Date()));
+	}
+}
+----
+=== Enable Scheduling
+Enable functionality with Annotation
+[source,kotlin]
+----
+@SpringBootApplication
+@EnableConfigurationProperties(BlogProperties::class)
+@EnableScheduling
+class BlogApplication
+
+fun main(args: Array<String>) {
+    runApplication<BlogApplication>(*args)
+}
+----
 == Conclusion
 
 We have now finished to build this sample Kotlin blog application. The source code https://github.com/spring-guides/tut-spring-boot-kotlin[is available on Github]. You can also have a look to https://docs.spring.io/spring/docs/current/spring-framework-reference/languages.html#kotlin[Spring Framework] and https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-kotlin.html[Spring Boot] reference documentation if you need more details on specific features.
